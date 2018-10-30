@@ -4,6 +4,7 @@ import mmall.commons.Const;
 import mmall.commons.ServiceResponse;
 import mmall.pojo.User;
 import mmall.service.IUserService;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +20,7 @@ public class UserManageController {
     private IUserService iUserService;
     @RequestMapping(value = "login.do",method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResponse adminLogin(String username, String password, HttpSession session) {
+    public ServiceResponse adminLogin(@Param("username")String username,@Param("password") String password, HttpSession session) {
         ServiceResponse<User> response = iUserService.login(username, password);
         if (response.isSuccess()) {
             User user = response.getData();

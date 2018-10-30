@@ -23,4 +23,6 @@ public interface IUserService {
     public ServiceResponse<User> updateInfomation(User user);
 
     public  ServiceResponse<User> getInformation(Integer userId);
+
+    public ServiceResponse checkAdminRole(User user);
 }

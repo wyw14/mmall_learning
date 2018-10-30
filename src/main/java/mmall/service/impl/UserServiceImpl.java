@@ -8,6 +8,7 @@ import mmall.pojo.User;
 import mmall.service.IUserService;
 import mmall.util.MD5Util;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,13 +20,13 @@ public class UserServiceImpl implements IUserService {
     private UserMapper userMapper;
 
     @Override
-    public ServiceResponse<User> login(String username, String password) {
+    public ServiceResponse<User> login(@Param("username") String username,@Param("password") String password) {
         int resultCount = userMapper.checkUsername(username);
         if (resultCount==0){
             return ServiceResponse.createByErrorMessage("用户名不存在");
         }
         String md5password=MD5Util.MD5EncodeUtf8(password);
-        User user = userMapper.selectLogin(username, md5password);
+        User user = userMapper.selectLogin(username,md5password);
         if (user==null){
             return ServiceResponse.createByErrorMessage("密码错误");
         }
@@ -38,11 +39,11 @@ public class UserServiceImpl implements IUserService {
 
     public ServiceResponse<String>register(User user){
         ServiceResponse<String> checkValid = this.checkValid(user.getEmail(), Const.EMAIL);
-        if(checkValid.isSuccess()){
+        if(!checkValid.isSuccess()){
             return checkValid;
         }
         checkValid = this.checkValid(user.getUsername(), Const.USERNAME);
-        if(checkValid.isSuccess()){
+        if(!checkValid.isSuccess()){
             return checkValid;
         }
         int resultCount;
@@ -56,14 +57,15 @@ public class UserServiceImpl implements IUserService {
         return ServiceResponse.createSuccessByMessage("注册成功");
     }
     public ServiceResponse<String> checkValid(String str,String type ) {
-        int resultCount = userMapper.checkUsername(str);
-        if (StringUtils.isNoneBlank(type)) {
+        int resultCount=0;
+        if (StringUtils.isNotBlank(type)) {
             if (Const.USERNAME.equals(type)){
+                resultCount = userMapper.checkUsername(str);
                 if (resultCount>0){
                     return ServiceResponse.createByErrorMessage("用户名已被注册");
                 }
             }
-            if (StringUtils.isNoneBlank(type)){
+            if (Const.EMAIL.equals(type)){
                 resultCount = userMapper.checkEmail(str);
                 if (resultCount>0){
                     return ServiceResponse.createByErrorMessage("邮箱已被使用");
@@ -75,7 +77,7 @@ public class UserServiceImpl implements IUserService {
 
     public ServiceResponse checkQuestion(String username){
         ServiceResponse checkValid = this.checkValid(username,Const.USERNAME);
-        if (!checkValid.isSuccess()){
+        if (checkValid.isSuccess()){
             return ServiceResponse.createByErrorMessage("用户名不存在");
         }
         String question=userMapper.selectQuestionByUsername(username);
@@ -85,7 +87,7 @@ public class UserServiceImpl implements IUserService {
         return ServiceResponse.createByErrorMessage("找回密码的问题是空的");
     }
     public ServiceResponse<String> checkAnswer(String username,String question,String answer){
-        int resultCount = userMapper.checkAnswer(username , question,question);
+        int resultCount = userMapper.checkAnswer(username , question,answer);
         if(resultCount>0){
             String forgetToken= UUID.randomUUID().toString();
             TokenCache.setkey("token_"+username,forgetToken);
@@ -99,7 +101,7 @@ public class UserServiceImpl implements IUserService {
             return ServiceResponse.createByErrorMessage("参数错误,Token需要传递");
         }
         ServiceResponse checkValid = this.checkValid(username,Const.USERNAME);
-        if (!checkValid.isSuccess()){
+        if (checkValid.isSuccess()){
             return ServiceResponse.createByErrorMessage("用户名不存在");
         }
         String token=TokenCache.getKey(TokenCache.TOKEN_PREFIX+username);
@@ -162,4 +164,14 @@ public class UserServiceImpl implements IUserService {
             user.setPassword(StringUtils.EMPTY);
             return ServiceResponse.createBySuccess(user);
         }
+    /*
+    校验是否是管理员
+     */
+    @Override
+    public ServiceResponse checkAdminRole(User user) {
+        if (user!=null&&user.getRole().intValue()==Const.role.ROLE_ADMIN){
+            return ServiceResponse.createBySuccess();
+        }
+        return  ServiceResponse.createByError();
+    }
 }
