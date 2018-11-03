@@ -3,14 +3,19 @@ package mmall.controller.portal;
 import mmall.commons.Const;
 import mmall.commons.ResponseCode;
 import mmall.commons.ServiceResponse;
+import mmall.commons.TokenCache;
 import mmall.pojo.User;
 import mmall.service.IUserService;
+import mmall.util.CookieUtils;
+import mmall.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 @Controller
@@ -25,10 +30,12 @@ public class UserController {
 
     @RequestMapping(value = "login.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResponse<User> login(String username, String password, HttpSession session) {
+    public ServiceResponse<User> login(String username, String password, HttpSession session, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         ServiceResponse<User> response = iUserService.login(username, password);
         if (response.isSuccess()) {
-            session.setAttribute(Const.CURRENT_USER, response.getData());
+//            session.setAttribute(Const.CURRENT_USER, response.getData());
+            CookieUtils.writeCookie(httpServletResponse,httpServletRequest.getSession().getId());
+            TokenCache.setkey(httpServletRequest.getSession().getId(), JsonUtil.obj2String(response.getData()));
         }
         return response;
     }

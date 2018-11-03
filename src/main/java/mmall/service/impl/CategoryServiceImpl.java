@@ -2,13 +2,12 @@ package mmall.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import lombok.extern.slf4j.Slf4j;
 import mmall.commons.ServiceResponse;
 import mmall.dao.CategoryMapper;
 import mmall.pojo.Category;
 import mmall.service.ICategoryService;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +15,9 @@ import java.util.List;
 import java.util.Set;
 
 @Service("iCategoryService")
+@Slf4j
 public class CategoryServiceImpl implements ICategoryService {
-    private Logger logger= LoggerFactory.getLogger(CategoryServiceImpl.class);
+    //private Logger logger= LoggerFactory.getLogger(CategoryServiceImpl.class);
 
     @Autowired
     private CategoryMapper categoryMapper;
@@ -27,7 +27,7 @@ public class CategoryServiceImpl implements ICategoryService {
             return ServiceResponse.createByErrorMessage("添加品类参数错误");
         }
         Category category = new Category();
-        category.setcategoryname(categoryName);
+        category.setCategoryname(categoryName);
         category.setParentId(parentId);
         category.setStatus(true);
 
@@ -43,7 +43,7 @@ public class CategoryServiceImpl implements ICategoryService {
             return ServiceResponse.createByErrorMessage("添加品类参数错误");
         }
         Category category = new Category();
-        category.setcategoryname(categoryName);
+        category.setCategoryname(categoryName);
         category.setId(categoryId);
 
         int rowCount = categoryMapper.updateByPrimaryKeySelective(category);
@@ -61,7 +61,7 @@ public class CategoryServiceImpl implements ICategoryService {
         }
        List<Category> categoryList= categoryMapper.selectCategoryChildrenByParentId(categoryId);
         if (categoryList.isEmpty()){
-            logger.info("未找到当前分类的子节点");
+            log.info("未找到当前分类的子节点");
         }
         return ServiceResponse.createBySuccess(categoryList);
     }

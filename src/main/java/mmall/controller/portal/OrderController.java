@@ -4,13 +4,12 @@ import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.demo.trade.config.Configs;
 import com.google.common.collect.Maps;
+import lombok.extern.slf4j.Slf4j;
 import mmall.commons.Const;
 import mmall.commons.ResponseCode;
 import mmall.commons.ServiceResponse;
 import mmall.pojo.User;
 import mmall.service.IOrderService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,8 +23,9 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/order/")
+@Slf4j
 public class OrderController {
-    private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
+    //private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
 
     @Autowired
     private IOrderService iOrderService;
@@ -115,16 +115,16 @@ public class OrderController {
             }
             map.put(name,valueStr);
         }
-        logger.info("支付宝回调,sign:{},trade_status:{},参数:{}",map.get("sign"),map.get("trade_status"),map.toString());
+        log.info("支付宝回调,sign:{},trade_status:{},参数:{}",map.get("sign"),map.get("trade_status"),map.toString());
         map.remove("sign_type");
         try {
             Boolean alipayRSAChecked = AlipaySignature.rsaCheckV2(map, Configs.getAlipayPublicKey(),"utf-8",Configs.getSignType());
             if (!alipayRSAChecked){
-                logger.info("有内奸终止交易");
+                log.info("有内奸终止交易");
                 return ServiceResponse.createByErrorMessage("有内奸终止交易");
             }
         } catch (AlipayApiException e) {
-            logger.error("回调请求出错",e);
+            log.error("回调请求出错",e);
         }
         ServiceResponse serviceResponse=iOrderService.aliCallback(map);
         if (serviceResponse.isSuccess()){

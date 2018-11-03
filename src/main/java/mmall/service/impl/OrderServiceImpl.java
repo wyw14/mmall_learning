@@ -14,6 +14,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import lombok.extern.slf4j.Slf4j;
 import mmall.commons.Const;
 import mmall.commons.ResponseCode;
 import mmall.commons.ServiceResponse;
@@ -30,8 +31,6 @@ import mmall.vo.OrderVo;
 import mmall.vo.ShippingVo;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +40,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 @Service("iOrderService")
+@Slf4j
 public class OrderServiceImpl implements IOrderService {
     @Autowired
     private OrderMapper orderMapper;
@@ -54,7 +54,7 @@ public class OrderServiceImpl implements IOrderService {
     private ProductMapper productMapper;
     @Autowired
     private ShippingMapper shippingMapper;
-    private static final Logger log= LoggerFactory.getLogger(OrderServiceImpl.class);
+   // private static final Logger log= LoggerFactory.getLogger(OrderServiceImpl.class);
 
     public ServiceResponse create(Integer userId, Integer shippingId){
         List<Cart> cartList=cartMapper.selectByUserId(userId);

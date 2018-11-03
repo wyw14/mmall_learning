@@ -3,15 +3,14 @@ package mmall.commons;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.TimeUnit;
-
+@Slf4j
 public class TokenCache {
 
     public static final String TOKEN_PREFIX="token_";
-    private static Logger logger= LoggerFactory.getLogger(TokenCache.class);
+    //private static Logger logger= LoggerFactory.getLogger(TokenCache.class);
     private static LoadingCache<String,String>localCache= CacheBuilder.newBuilder().initialCapacity(1000).maximumSize(10000).expireAfterAccess(12, TimeUnit.HOURS)
     .build(new CacheLoader<String, String>() {
         @Override
@@ -31,7 +30,7 @@ public class TokenCache {
             }
             return value;
         } catch (Exception e) {
-            logger.error("localCache get error",e);
+            log.error("localCache get error",e);
         }
         return null;
     }
