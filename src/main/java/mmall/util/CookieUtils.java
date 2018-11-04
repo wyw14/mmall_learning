@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @Slf4j
 public class CookieUtils {
-    private final static String COOKIE_DOMAIN="127.0.0.1";
+    private final static String COOKIE_DOMAIN="www.yiku.com";
     private final static String COOKIE_NAME="LOGIN_INFO";
 
     public static String readCookie(HttpServletRequest request){
@@ -26,7 +26,7 @@ public class CookieUtils {
     }
     public static void writeLoginToken(HttpServletResponse response,String token){
         Cookie ck = new Cookie(COOKIE_NAME,token);
-//        ck.setDomain(COOKIE_DOMAIN);
+        ck.setDomain(COOKIE_DOMAIN);
         ck.setPath("/");//代表设置在根目录
         ck.setHttpOnly(false);
         //单位是秒。
@@ -40,6 +40,8 @@ public class CookieUtils {
         for (Cookie cookie:cookies){
             if (StringUtils.equals(cookie.getName(),COOKIE_NAME)){
                 cookie.setMaxAge(0);
+                cookie.setDomain(COOKIE_DOMAIN);
+                cookie.setPath("/");//代表设置在根目录
             }
         }
     }
