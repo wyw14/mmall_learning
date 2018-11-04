@@ -45,13 +45,13 @@ public class UserController {
 
     @RequestMapping(value = "logout.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResponse<String> logout(HttpServletRequest request) {
+    public ServiceResponse<String> logout(HttpServletRequest request,HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         for (Cookie cookie:cookies){
             if (StringUtils.equals(cookie.getName(), PropertiesUtil.getProperty("COOKIE_NAME")))
             RedisPoolUtils.del(cookie.getValue());
         }
-        CookieUtils.delCookie(request);
+        CookieUtils.delCookie(request,response);
 
         for (Cookie cookie:cookies){
             if (StringUtils.equals(cookie.getName(), PropertiesUtil.getProperty("COOKIE_NAME")))
