@@ -3,17 +3,20 @@ package mmall.controller.portal;
 import mmall.commons.Const;
 import mmall.commons.ResponseCode;
 import mmall.commons.ServiceResponse;
-import mmall.commons.TokenCache;
 import mmall.pojo.User;
 import mmall.service.IUserService;
 import mmall.util.CookieUtils;
 import mmall.util.JsonUtil;
+import mmall.util.PropertiesUtil;
+import mmall.util.RedisPoolUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -30,20 +33,29 @@ public class UserController {
 
     @RequestMapping(value = "login.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResponse<User> login(String username, String password, HttpSession session, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+    public ServiceResponse<User> login(String username, String password, HttpSession session, HttpServletRequest    httpServletRequest, HttpServletResponse httpServletResponse) {
         ServiceResponse<User> response = iUserService.login(username, password);
         if (response.isSuccess()) {
 //            session.setAttribute(Const.CURRENT_USER, response.getData());
-            CookieUtils.writeCookie(httpServletResponse,httpServletRequest.getSession().getId());
-            TokenCache.setkey(httpServletRequest.getSession().getId(), JsonUtil.obj2String(response.getData()));
+            CookieUtils.writeLoginToken(httpServletResponse,session.getId());
+            RedisPoolUtils.set(httpServletRequest.getSession().getId(), JsonUtil.obj2String(response.getData()));
         }
         return response;
     }
 
     @RequestMapping(value = "logout.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResponse<String> logout(HttpSession session) {
-        session.removeAttribute(Const.CURRENT_USER);
+    public ServiceResponse<String> logout(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        for (Cookie cookie:cookies){
+            if (StringUtils.equals(cookie.getName(), PropertiesUtil.getProperty("COOKIE_NAME")))
+            RedisPoolUtils.del(cookie.getValue());
+        }
+        CookieUtils.delCookie(request);
+        for (Cookie cookie:cookies){
+            if (StringUtils.equals(cookie.getName(), PropertiesUtil.getProperty("COOKIE_NAME")))
+                System.out.println(cookie.getValue());
+        }
         return ServiceResponse.createBySuccess();
     }
 
@@ -61,8 +73,8 @@ public class UserController {
 
     @RequestMapping(value = "getUserinfo.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResponse<User> getUserInfo(HttpSession session) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
+    public ServiceResponse<User> getUserInfo(HttpServletRequest request) {
+        User user=JsonUtil.string2Obj( RedisPoolUtils.get(CookieUtils.readCookie(request)),User.class);
         if (user != null) {
             return ServiceResponse.createBySuccess(user);
         }

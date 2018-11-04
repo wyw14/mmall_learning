@@ -22,7 +22,7 @@ public class RedisPool {
         jedisPoolConfig.setMinIdle(minIdle);
         jedisPoolConfig.setTestOnReturn(testOnReturn);
         jedisPoolConfig.setTestOnBorrow(testOnBorrow);
-        pool=new JedisPool(jedisPoolConfig,"192.168.89.133",6379,1000*2);
+        pool=new JedisPool(jedisPoolConfig,PropertiesUtil.getProperty("redis.Host"),6379,1000*2);
     }
     static {
         init();
