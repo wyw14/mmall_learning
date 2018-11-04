@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @Slf4j
 public class CookieUtils {
-    private final static String COOKIE_DOMAIN="www.yiku.com";
+    private final static String COOKIE_DOMAIN=".yiku.com";
     private final static String COOKIE_NAME="LOGIN_INFO";
 
     public static String readCookie(HttpServletRequest request){
