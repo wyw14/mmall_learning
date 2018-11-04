@@ -52,6 +52,7 @@ public class UserController {
             RedisPoolUtils.del(cookie.getValue());
         }
         CookieUtils.delCookie(request);
+
         for (Cookie cookie:cookies){
             if (StringUtils.equals(cookie.getName(), PropertiesUtil.getProperty("COOKIE_NAME")))
                 System.out.println(cookie.getValue());
