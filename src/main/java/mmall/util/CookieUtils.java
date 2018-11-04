@@ -35,13 +35,14 @@ public class CookieUtils {
         log.info("write cookieName:{},cookieValue:{}",ck.getName(),ck.getValue());
         response.addCookie(ck);
     }
-    public static void delCookie(HttpServletRequest request){
+    public static void delCookie(HttpServletRequest request,HttpServletResponse response){
         Cookie[] cookies = request.getCookies();
         for (Cookie cookie:cookies){
             if (StringUtils.equals(cookie.getName(),COOKIE_NAME)){
                 cookie.setMaxAge(0);
                 cookie.setDomain(COOKIE_DOMAIN);
                 cookie.setPath("/");//代表设置在根目录
+                response.addCookie(cookie);
             }
         }
     }
