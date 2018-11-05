@@ -35,7 +35,7 @@ public class UserController {
     @ResponseBody
     public ServiceResponse<User> login(String username, String password, HttpSession session, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         ServiceResponse<User> response = iUserService.login(username, password);
-        if (response.isSuccess()) {
+        if (response.isSuccess()&&CookieUtils.checkLogined(httpServletRequest)) {
 //            session.setAttribute(Const.CURRENT_USER, response.getData());
             CookieUtils.writeLoginToken(httpServletResponse, session.getId());
             RedisPoolUtils.setex(httpServletRequest.getSession().getId(), JsonUtil.obj2String(response.getData()), 60 * 60);

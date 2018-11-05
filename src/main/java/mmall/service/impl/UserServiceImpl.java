@@ -111,10 +111,11 @@ public class UserServiceImpl implements IUserService {
             return ServiceResponse.createSuccessByMessage("token无效或过期");
         }
         if (StringUtils.equals(forgetToken,token)){
+
             String mdPassword=MD5Util.MD5EncodeUtf8(newPassword);
             int rowCount=userMapper.updatePasswordByUsername(username,mdPassword);
-
             if (rowCount>0){
+                RedisPoolUtils.del(Const.TOKEN_PREFIX+username);
                 return ServiceResponse.createSuccessByMessage("修改密码成功");
             }
         }

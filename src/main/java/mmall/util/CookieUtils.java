@@ -24,6 +24,17 @@ public class CookieUtils {
         }
         return null;
     }
+
+    public static Boolean checkLogined(HttpServletRequest request){
+        for (Cookie ck:(request.getCookies())){
+            if (StringUtils.equals(ck.getName(),PropertiesUtil.getProperty("COOKIE_NAME","LOGIN_INFO"))){
+                return false;//表示用户已经登录无需再次登录
+            }
+        }
+        return true;
+    }
+
+
     public static void writeLoginToken(HttpServletResponse response,String token){
         Cookie ck = new Cookie(COOKIE_NAME,token);
         ck.setDomain(COOKIE_DOMAIN);
