@@ -6,6 +6,8 @@ public class Const {
     public static final String CURRENT_USER = "currentUser";
     public static final String EMAIL = "email";
     public static final String USERNAME = "username";
+    public static final String TOKEN_PREFIX  = "token_";
+
 
     public interface role {
         int ROLE_CUSTOMER = 0;//代表普通用户

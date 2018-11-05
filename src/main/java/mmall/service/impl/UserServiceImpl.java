@@ -2,11 +2,11 @@ package mmall.service.impl;
 
 import mmall.commons.Const;
 import mmall.commons.ServiceResponse;
-import mmall.commons.TokenCache;
 import mmall.dao.UserMapper;
 import mmall.pojo.User;
 import mmall.service.IUserService;
 import mmall.util.MD5Util;
+import mmall.util.RedisPoolUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +90,8 @@ public class UserServiceImpl implements IUserService {
         int resultCount = userMapper.checkAnswer(username , question,answer);
         if(resultCount>0){
             String forgetToken= UUID.randomUUID().toString();
-            TokenCache.setkey("token_"+username,forgetToken);
+            //TokenCache.setkey(Const.TOKEN_PREFIX+username,forgetToken);
+            RedisPoolUtils.setex(Const.TOKEN_PREFIX+username,forgetToken,60*60*12);
             return ServiceResponse.createBySuccess(forgetToken);
         }
         return ServiceResponse.createByErrorMessage("问题的答案错误");
@@ -104,7 +105,8 @@ public class UserServiceImpl implements IUserService {
         if (checkValid.isSuccess()){
             return ServiceResponse.createByErrorMessage("用户名不存在");
         }
-        String token=TokenCache.getKey(TokenCache.TOKEN_PREFIX+username);
+        //String token=TokenCache.getKey(TokenCache.TOKEN_PREFIX+username);
+        String token=RedisPoolUtils.get(Const.TOKEN_PREFIX+username);
         if (StringUtils.isBlank(token)){
             return ServiceResponse.createSuccessByMessage("token无效或过期");
         }
@@ -159,7 +161,7 @@ public class UserServiceImpl implements IUserService {
         public  ServiceResponse<User> getInformation(Integer userId){
             User user=userMapper.selectByPrimaryKey(userId);
             if (user==null){
-                return ServiceResponse.createByErrorMessage("找不带当前用户");
+                return ServiceResponse.createByErrorMessage("找不到当前用户");
             }
             user.setPassword(StringUtils.EMPTY);
             return ServiceResponse.createBySuccess(user);

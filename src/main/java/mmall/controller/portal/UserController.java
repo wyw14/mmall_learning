@@ -33,27 +33,27 @@ public class UserController {
 
     @RequestMapping(value = "login.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResponse<User> login(String username, String password, HttpSession session, HttpServletRequest    httpServletRequest, HttpServletResponse httpServletResponse) {
+    public ServiceResponse<User> login(String username, String password, HttpSession session, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         ServiceResponse<User> response = iUserService.login(username, password);
         if (response.isSuccess()) {
 //            session.setAttribute(Const.CURRENT_USER, response.getData());
-            CookieUtils.writeLoginToken(httpServletResponse,session.getId());
-            RedisPoolUtils.setex(httpServletRequest.getSession().getId(), JsonUtil.obj2String(response.getData()),60*60);
+            CookieUtils.writeLoginToken(httpServletResponse, session.getId());
+            RedisPoolUtils.setex(httpServletRequest.getSession().getId(), JsonUtil.obj2String(response.getData()), 60 * 60);
         }
         return response;
     }
 
     @RequestMapping(value = "logout.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResponse<String> logout(HttpServletRequest request,HttpServletResponse response) {
+    public ServiceResponse<String> logout(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
-        for (Cookie cookie:cookies){
+        for (Cookie cookie : cookies) {
             if (StringUtils.equals(cookie.getName(), PropertiesUtil.getProperty("COOKIE_NAME")))
-            RedisPoolUtils.del(cookie.getValue());
+                RedisPoolUtils.del(cookie.getValue());
         }
-        CookieUtils.delCookie(request,response);
+        CookieUtils.delCookie(request, response);
 
-        for (Cookie cookie:cookies){
+        for (Cookie cookie : cookies) {
             if (StringUtils.equals(cookie.getName(), PropertiesUtil.getProperty("COOKIE_NAME")))
                 System.out.println(cookie.getValue());
         }
@@ -75,7 +75,7 @@ public class UserController {
     @RequestMapping(value = "getUserinfo.do", method = RequestMethod.POST)
     @ResponseBody
     public ServiceResponse<User> getUserInfo(HttpServletRequest request) {
-        User user=JsonUtil.string2Obj( RedisPoolUtils.get(CookieUtils.readCookie(request)),User.class);
+        User user = JsonUtil.string2Obj(RedisPoolUtils.get(CookieUtils.readCookie(request)), User.class);
         if (user != null) {
             return ServiceResponse.createBySuccess(user);
         }
